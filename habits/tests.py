@@ -1,11 +1,14 @@
 from rest_framework.test import APITestCase
 from rest_framework import status
-from django.utils.timezone import timedelta
+from django.utils.timezone import timedelta, localtime
 from datetime import time
 from habits.models import Habit
 from django.contrib.auth import get_user_model
+from unittest.mock import patch
+from habits.tasks import send_habit_reminders
 
 User = get_user_model()
+
 
 class HabitPaginationTests(APITestCase):
     def setUp(self):
@@ -85,3 +88,30 @@ class HabitPaginationTests(APITestCase):
         habit = Habit.objects.filter(user=self.user1).first()
         response = self.client.delete(f'/api/habits/{habit.id}/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    @patch('habits.tasks.send_telegram_message.delay')
+    def test_send_habit_reminders_task(self, mock_send):
+        """
+        Проверяем, что задача send_habit_reminders находит привычки и отправляет сообщения
+        """
+        # Добавим telegram_chat_id
+        self.user1.telegram_chat_id = '123456789'
+        self.user1.save()
+
+        now = localtime().replace(second=0, microsecond=0)
+        Habit.objects.create(
+            user=self.user1,
+            action='Утренняя зарядка',
+            reminder_time=now.time(),
+            is_public=False,
+            is_pleasant=False,
+            time=now.time(),
+            execution_time=timedelta(minutes=1)
+        )
+
+        send_habit_reminders()
+
+        mock_send.assert_called_once_with(
+            self.user1.telegram_chat_id,
+            "Напоминание: пора делать привычку 'Утренняя зарядка'!"
+        )

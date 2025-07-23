@@ -2,6 +2,7 @@ from celery import shared_task
 import requests
 from django.conf import settings
 
+
 @shared_task
 def send_telegram_message(chat_id, text):
     token = settings.TELEGRAM_BOT_TOKEN

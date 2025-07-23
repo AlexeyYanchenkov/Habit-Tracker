@@ -13,10 +13,12 @@ TELEGRAM_API_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 bot = Bot(token=TELEGRAM_API_TOKEN)
 dp = Dispatcher(storage=MemoryStorage())
 
+
 @dp.message(CommandStart())
 async def handle_start(message: Message):
     chat_id = message.chat.id
     await message.answer(f"Ваш ID: {chat_id} — скопируйте его и сохраните в профиле на сайте.")
+
 
 async def main():
     await dp.start_polling(bot)

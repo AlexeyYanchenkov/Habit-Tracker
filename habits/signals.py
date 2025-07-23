@@ -5,6 +5,7 @@ from django_celery_beat.models import PeriodicTask, CrontabSchedule
 from django.utils.timezone import localtime
 import json
 
+
 @receiver(post_save, sender=Habit)
 def create_periodic_task_for_habit(sender, instance, created, **kwargs):
     if not instance.reminder_time or not instance.periodicity:
@@ -29,6 +30,7 @@ def create_periodic_task_for_habit(sender, instance, created, **kwargs):
             'args': json.dumps([instance.id]),
         }
     )
+
 
 @receiver(post_delete, sender=Habit)
 def delete_periodic_task_for_habit(sender, instance, **kwargs):

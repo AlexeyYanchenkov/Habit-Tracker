@@ -3,7 +3,9 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from datetime import timedelta
 
+
 User = get_user_model()
+
 
 class Habit(models.Model):
     """Модель привычки"""
@@ -69,7 +71,6 @@ class Habit(models.Model):
         blank=True
     )  # время для напоминания
 
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -82,7 +83,7 @@ class Habit(models.Model):
         if self.execution_time is not None and self.execution_time > timedelta(seconds=120):
             raise ValidationError("Execution time слишком большое")
 
-        # 3. В связанные привычки можно выбирать только привычки с флагом is_pleasant=True (это уже ограничено в limit_choices_to, но проверим дополнительно)
+        # 3. В связанные привычки можно выбирать только привычки с флагом is_pleasant=True
         if self.related_habit and not self.related_habit.is_pleasant:
             raise ValidationError("Связанная привычка должна быть приятной.")
 

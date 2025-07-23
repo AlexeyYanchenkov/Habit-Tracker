@@ -1,5 +1,6 @@
 from rest_framework import permissions
 
+
 class IsOwnerOrReadOnlyPublic(permissions.BasePermission):
     """
     Разрешить владельцу объекта делать всё,

@@ -25,6 +25,7 @@ class HabitViewSet(viewsets.ModelViewSet):
         # Автоматическая привязка пользователя
         serializer.save(user=self.request.user)
 
+
 class PublicHabitListView(ListAPIView):
     queryset = Habit.objects.filter(is_public=True)
     serializer_class = HabitSerializer
