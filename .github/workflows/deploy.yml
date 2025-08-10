@@ -18,20 +18,21 @@ jobs:
 
       - name: Save SSH key
         run: |
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ${{ runner.temp }}/id_rsa
-          chmod 600 ${{ runner.temp }}/id_rsa
+          echo "${{ secrets.SERVER_SSH_KEY }}" > "${{ runner.temp }}/id_rsa"
+          chmod 600 "${{ runner.temp }}/id_rsa"
 
       - name: Debug SSH connection with verbose output
-        run: ssh -vvv -o StrictHostKeyChecking=no -i ${{ runner.temp }}/id_rsa -p 22 ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }} exit
+        run: ssh -vvv -o StrictHostKeyChecking=no -i "${{ runner.temp }}/id_rsa" -p 22 ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }} exit
 
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_IP }}
-          username: alexey-1408
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
             cd /home/alexey-1408/Habit-Tracker
             docker-compose pull
+
             docker-compose up -d --build
