@@ -16,15 +16,13 @@ jobs:
       - name: Check SSH port with nc
         run: nc -vz ${{ secrets.SERVER_IP }} 22
 
-      - name: Debug SSH connection with verbose output
-        run: ssh -vvv -o StrictHostKeyChecking=no -i ${{ runner.temp }}/id_rsa -p 22 ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }} exit
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-        
       - name: Save SSH key
         run: |
           echo "${{ secrets.SERVER_SSH_KEY }}" > ${{ runner.temp }}/id_rsa
           chmod 600 ${{ runner.temp }}/id_rsa
+
+      - name: Debug SSH connection with verbose output
+        run: ssh -vvv -o StrictHostKeyChecking=no -i ${{ runner.temp }}/id_rsa -p 22 ${{ secrets.SSH_USERNAME }}@${{ secrets.SERVER_IP }} exit
 
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.6
