@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Deploy
 
 on:
   push:
@@ -10,25 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H 89.169.190.225 >> ~/.ssh/known_hosts
-
-      - name: Deploy via SSH
-        run: |
-          ssh alexey-1408@89.169.190.225 << 'EOF'
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: alexey-1408
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          script: |
             cd /home/alexey-1408/Habit-Tracker
-            git pull origin main
-            source venv/bin/activate
-            pip install -r requirements.txt
-            python manage.py migrate
-            python manage.py collectstatic --noinput
-            sudo systemctl restart gunicorn
-            sudo systemctl restart nginx
-          EOF
+            docker compose pull
+            docker compose up -d --build
