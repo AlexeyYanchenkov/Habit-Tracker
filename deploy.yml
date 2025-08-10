@@ -22,5 +22,5 @@ jobs:
           port: 22
           script: |
             cd /home/alexey-1408/Habit-Tracker
-            docker compose pull
-            docker compose up -d --build
+            docker-compose pull
+            docker-compose up -d --build
