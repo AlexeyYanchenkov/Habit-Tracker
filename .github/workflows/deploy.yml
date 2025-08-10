@@ -12,6 +12,21 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: habits_db
+          POSTGRES_USER: anti
+          POSTGRES_PASSWORD: 1234567890
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -37,14 +52,20 @@ jobs:
           DJANGO_SETTINGS_MODULE: habits_project.settings
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DEBUG: "True"
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_NAME: habits_db
+          DB_USER: anti
+          DB_PASSWORD: 1234567890
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
-        run: pytest --cov=. --cov-report=term-missing
+        run: |
+          # Ждём пока БД будет готова к подключению
+          until pg_isready -h 127.0.0.1 -p 5432; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
+          pytest --cov=. --cov-report=term-missing
 
       - name: Run flake8 lint
         run: flake8 .
