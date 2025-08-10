@@ -16,14 +16,10 @@ jobs:
       - name: Check SSH port with nc
         run: nc -vz ${{ secrets.SERVER_IP }} 22
 
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
       - name: Debug SSH connection
-        run: ssh -vvv -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa alexey-1408@${{ secrets.SERVER_IP }} exit
+        run: ssh -vvv -o StrictHostKeyChecking=no -i ${{ secrets.SERVER_SSH_KEY_PATH }} alexey-1408@${{ secrets.SERVER_IP }} exit
+        env:
+          SSH_AUTH_SOCK: ""
 
       - name: Deploy to server via SSH
         uses: appleboy/ssh-action@v0.1.6
